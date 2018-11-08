@@ -1,0 +1,37 @@
+<configuration>
+  <!-- disable LOGBACK's internal logging-->
+  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+      </pattern>
+      <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+        <level>INFO</level>
+      </filter>
+    </encoder>
+  </appender>
+
+  <appender name="FILE"
+            class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- Daily rollover -->
+      <fileNamePattern>target/logs/kafka_test_%d{yyyy-MM-dd}.log
+      </fileNamePattern>
+
+      <!-- Keep 7 days' worth of history -->
+      <maxHistory>7</maxHistory>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <!-- Configure so that it outputs to both console and log file -->
+  <root level="INFO">
+    <appender-ref ref="FILE"/>
+  </root>
+</configuration>
