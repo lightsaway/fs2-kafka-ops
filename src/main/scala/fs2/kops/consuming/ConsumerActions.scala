@@ -17,7 +17,7 @@ trait ConsumerActions {
       timeout: Long
   )(implicit F: Async[F]): Stream[F, ConsumerRecords[K, V]] = {
     for {
-      _ <- Stream.eval(subscribe[F, K, V](consumer, topic))
+      _ <- Stream.eval(subscribe[F](consumer, topic))
       batch <- consume[F, K, V](consumer, timeout)
         .filter(_.count() > 0)
         .repeat
@@ -31,8 +31,8 @@ trait ConsumerActions {
     Stream.eval(F.delay(consumer.poll(timeout))).filter(_.count() > 0)
   }
 
-  def subscribe[F[_], K, V](
-      consumer: Consumer[K, V],
+  def subscribe[F[_]](
+      consumer: Consumer[_, _],
       topic: String
   )(implicit F: Sync[F]): F[Unit] = {
     F.delay(consumer.subscribe(List(topic).asJava))
@@ -51,5 +51,8 @@ trait ConsumerActions {
       ).asJava
     )
   }
+
+  def seek[F[_]](c: Consumer[_, _], p: TopicPartition, offset: Long)(
+      implicit F: Async[F]): F[Unit] = F.delay(c.seek(p, offset))
 
 }

@@ -30,12 +30,9 @@ final private[kops] class CommitOrSeekBackSink[F[_]] extends ConsumerActions {
   )(implicit F: Async[F]): Sink[F, KafkaProcessResult[K, V]] = _.evalMap {
     case KafkaConsumeSuccess(record, _) => commit(consumer, record)
     case KafkaConsumeFailure(record, _) =>
-      F.delay(
-        consumer.seek(
-          new TopicPartition(record.topic, record.partition),
-          record.offset() - 1
-        )
-      )
+      seek(consumer,
+           new TopicPartition(record.topic, record.partition),
+           record.offset() - 1)
   }
 }
 
