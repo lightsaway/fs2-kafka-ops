@@ -11,7 +11,6 @@ import fs2.kops.consuming.{
   KafkaConsumeSuccess,
   KafkaProcessResult
 }
-
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.Logger
@@ -50,10 +49,8 @@ final private[kops] class LogSink[F[_]] {
 final private[kops] class CommitAllSink[F[_]] extends ConsumerActions {
   def apply[K, V](
       consumer: Consumer[K, V]
-  )(implicit F: Async[F]): Sink[F, KafkaProcessResult[K, V]] = _.evalMap {
-    case KafkaConsumeSuccess(record, _) => commit(consumer, record)
-    case KafkaConsumeFailure(record, _) => commit(consumer, record)
-  }
+  )(implicit F: Async[F]): Sink[F, KafkaProcessResult[K, V]] =
+    _.evalMap(x => commit(consumer, x.rawRecord))
 }
 
 final private[kops] class PrometheusResultSink[F[_]] {
