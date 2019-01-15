@@ -7,7 +7,7 @@ import org.apache.kafka.clients.producer.{
 }
 import cats.implicits._
 
-trait Producing {
+trait ProducerActions {
 
   def unsafeProduce[F[_], K, V](
       producer: Producer[K, V],

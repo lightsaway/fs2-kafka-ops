@@ -14,7 +14,7 @@ trait Consumers {
 final private[kops] class ConsumeAndProcessUnchunked[F[_]]
     extends ApacheKafkaExtentions
     with StreamSyntax
-    with Consuming {
+    with ConsumerActions {
   def apply[K, V](
       consumer: Consumer[K, V],
       pipe: Pipe[F, ConsumerRecord[K, V], KafkaProcessResult[K, V]],

@@ -10,7 +10,7 @@ import org.apache.kafka.clients.consumer.{
 import org.apache.kafka.common.TopicPartition
 import scala.collection.JavaConverters._
 
-trait Consuming {
+trait ConsumerActions {
   def subscribeAndConsume[F[_], K, V](
       consumer: Consumer[K, V],
       topic: String,

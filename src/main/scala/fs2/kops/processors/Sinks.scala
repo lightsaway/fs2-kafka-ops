@@ -6,7 +6,7 @@ import fs2.async.Ref
 import fs2.async.mutable.Topic
 import io.prometheus.client.Counter
 import fs2.kops.consuming.{
-  Consuming,
+  ConsumerActions,
   KafkaConsumeFailure,
   KafkaConsumeSuccess,
   KafkaProcessResult
@@ -24,7 +24,7 @@ trait Sinks {
   def topicPublishSink[F[_]] = new TopicPublishSink[F]
 }
 
-final private[kops] class CommitOrSeekBackSink[F[_]] extends Consuming {
+final private[kops] class CommitOrSeekBackSink[F[_]] extends ConsumerActions {
   def apply[K, V](
       consumer: Consumer[K, V]
   )(implicit F: Async[F]): Sink[F, KafkaProcessResult[K, V]] = _.evalMap {
@@ -50,7 +50,7 @@ final private[kops] class LogSink[F[_]] {
     }
 }
 
-final private[kops] class CommitAllSink[F[_]] extends Consuming {
+final private[kops] class CommitAllSink[F[_]] extends ConsumerActions {
   def apply[K, V](
       consumer: Consumer[K, V]
   )(implicit F: Async[F]): Sink[F, KafkaProcessResult[K, V]] = _.evalMap {

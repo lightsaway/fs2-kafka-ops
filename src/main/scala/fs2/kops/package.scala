@@ -1,19 +1,19 @@
 package fs2
 
 import fs2.kops.configuration.ConfigurationExtention
-import fs2.kops.consuming.{ConsumerBuilder, Consumers, Consuming}
+import fs2.kops.consuming.{ConsumerBuilder, Consumers, ConsumerActions}
 import fs2.kops.processors.{Pipes, ProcessorExtentions, Sinks}
-import fs2.kops.producing.{ProducerBuilder, Producers, Producing}
+import fs2.kops.producing.{ProducerBuilder, Producers, ProducerActions}
 
 package object kops
     extends ConfigurationExtention
     with ApacheKafkaExtentions
     with ProcessorExtentions
     with ProducerBuilder
-    with Producing
+    with ProducerActions
     with Producers
     with ConsumerBuilder
-    with Consuming
+    with ConsumerActions
     with Consumers
     with Sinks
     with Pipes

@@ -45,7 +45,7 @@ final private[kops] class KafkaConsumerBuilder[F[_]] {
 }
 
 final private[kops] class SubscribedKafkaConsumerBuilder[F[_]]
-    extends Consuming {
+    extends ConsumerActions {
   def create[K, V](
       settings: Map[String, AnyRef],
       keyDeserializer: Deserializer[K],
@@ -84,7 +84,7 @@ final private[kops] class SimpleKafkaConsumerBuilder[F[_]] {
 }
 
 final private[kops] class SimpleSubscribedKafkaConsumerBuilder[F[_]]
-    extends Consuming {
+    extends ConsumerActions {
   def create(settings: Map[String, AnyRef], topic: String)(
       implicit F: Sync[F]): F[Consumer[String, String]] =
     new KafkaConsumerBuilder[F]

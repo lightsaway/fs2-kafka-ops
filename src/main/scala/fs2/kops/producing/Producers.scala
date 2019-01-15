@@ -16,7 +16,7 @@ trait Producers {
   def produceTransacted[F[_]]: ProduceTransacted[F] = new ProduceTransacted[F]
 }
 
-final private[kops] class ProduceOne[F[_]] extends Producing {
+final private[kops] class ProduceOne[F[_]] extends ProducerActions {
   def apply[K, V, B](
       p: Producer[K, V],
       f: B => ProducerRecord[K, V] = identity _
@@ -24,7 +24,7 @@ final private[kops] class ProduceOne[F[_]] extends Producing {
     event => unsafeProduce[F, K, V](p, f(event)).attempt
 }
 
-final private[kops] class ProduceTransacted[F[_]] extends Producing {
+final private[kops] class ProduceTransacted[F[_]] extends ProducerActions {
   import cats.implicits._
   import fs2.kops.DualExecutionContext._
   def apply[K, V, B](p: Producer[K, V],
@@ -46,7 +46,7 @@ final private[kops] class ProduceTransacted[F[_]] extends Producing {
     }
 }
 
-final private[kops] class SubscribedProducing[F[_]] extends Producing {
+final private[kops] class SubscribedProducing[F[_]] extends ProducerActions {
   def apply[K, V, B](
       p: Producer[K, V],
       topic: Topic[F, B],
