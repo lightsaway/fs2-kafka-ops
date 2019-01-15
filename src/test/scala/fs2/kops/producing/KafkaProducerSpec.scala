@@ -1,11 +1,16 @@
-package fs2.kops
+package fs2.kops.producing
 
 import java.util.concurrent.Executors
 
 import cats.effect.{IO, Timer}
 import fs2.Pipe
 import fs2.internal.ThreadFactories
-import fs2.kops.producing.KafkaSendException
+import fs2.kops.{
+  DualExecutionContext,
+  produceOne,
+  produceTransacted,
+  subscribedProducer
+}
 import org.apache.kafka.clients.producer.{MockProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
 import org.scalatest.{FlatSpec, Matchers}
@@ -14,7 +19,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-class KafkaProducerTest extends FlatSpec with Matchers {
+class KafkaProducerSpec extends FlatSpec with Matchers {
 
   behavior.of("subscribed kafka producer stream")
 

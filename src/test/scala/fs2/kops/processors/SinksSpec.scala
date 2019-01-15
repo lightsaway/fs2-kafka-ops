@@ -1,9 +1,15 @@
-package fs2.kops
+package fs2.kops.processors
 
 import cats.effect.IO
 import fs2.Stream
 import fs2.async.{Ref, topic}
 import fs2.kops.consuming.{KafkaConsumeFailure, KafkaConsumeSuccess}
+import fs2.kops.{
+  commitAllSink,
+  commitOrSeekBackSink,
+  prometheusSink,
+  topicPublishSink
+}
 import io.prometheus.client.Counter
 import org.apache.kafka.clients.consumer._
 import org.apache.kafka.common.TopicPartition
@@ -15,7 +21,7 @@ import org.scalatest.{FunSuite, Matchers}
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SinksTest extends FunSuite with Matchers with MockitoSugar {
+class SinksSpec extends FunSuite with Matchers with MockitoSugar {
 
   test("testTopicPublishSink") {
     val t = topic[IO, Int](0).unsafeRunSync()

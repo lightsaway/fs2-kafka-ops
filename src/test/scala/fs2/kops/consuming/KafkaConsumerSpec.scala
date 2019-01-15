@@ -1,13 +1,8 @@
-package fs2.kops
+package fs2.kops.consuming
 
 import cats.effect.IO
 import fs2.Pipe
-
-import fs2.kops.consuming.{
-  KafkaConsumeFailure,
-  KafkaConsumeSuccess,
-  KafkaProcessResult
-}
+import fs2.kops.{commitOrSeekBackSink, consumeAndProcessUnchunked, logSink}
 import org.apache.kafka.clients.consumer.{
   ConsumerRecord,
   MockConsumer,
@@ -15,10 +10,11 @@ import org.apache.kafka.clients.consumer.{
 }
 import org.apache.kafka.common.TopicPartition
 import org.scalatest.{FlatSpec, Matchers}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.collection.JavaConverters._
 
-class KafkaConsumerTest extends FlatSpec with Matchers {
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class KafkaConsumerSpec extends FlatSpec with Matchers {
   import DataBuilder._
 
   behavior.of("subscribed kafka producer stream")

@@ -1,10 +1,11 @@
-package fs2.kops
+package fs2.kops.processors
 
 import cats.effect.IO
 import fs2.{Pipe, Sink}
 import org.scalatest.{FunSuite, Matchers}
 
-class ProcessorExtentionsTest extends FunSuite with Matchers {
+import fs2.kops.syntax.pipe._
+class ProcessorExtentionsSpec extends FunSuite with Matchers {
 
   test("testPipeImprovements 'and composition'") {
 
@@ -22,7 +23,6 @@ class ProcessorExtentionsTest extends FunSuite with Matchers {
   }
 
   test("testPipeImprovements 'observe' composition") {
-
     import scala.concurrent.ExecutionContext.Implicits.global
     var flag: String = ""
     val p1: Pipe[IO, String, String] = identity
