@@ -4,7 +4,11 @@ import cats.effect.Effect
 import fs2.Stream
 import fs2.kops.configuration.ConfigurationExtention
 import fs2.kops.processors.ProcessorExtentions
-import org.apache.kafka.clients.consumer.{Consumer, ConsumerRecords}
+import org.apache.kafka.clients.consumer.{
+  Consumer,
+  ConsumerRecord,
+  ConsumerRecords
+}
 import org.apache.kafka.clients.producer.Producer
 
 import scala.concurrent.ExecutionContext
@@ -13,12 +17,15 @@ trait ApacheKafkaExtentions {
 
   import scala.collection.JavaConverters._
 
-  implicit class ConsumerRecordsImprovements[K, V](r: ConsumerRecords[K, V]) {
-    def partitioned =
+  implicit class ConsumerRecordsSugar[K, V](r: ConsumerRecords[K, V]) {
+    def partitioned: List[List[ConsumerRecord[K, V]]] =
       r.partitions().asScala.map(tp => r.records(tp).asScala.toList).toList
+
+    def all: List[ConsumerRecord[K, V]] =
+      r.partitioned.flatten
   }
 
-  implicit class ConsumerExtentions[K, V, F[_]](c: Consumer[K, V]) {
+  implicit class ConsumerSugar[K, V, F[_]](c: Consumer[K, V]) {
     final private val CONNECTION_COUNT_METRIC = "connection-count"
 
     def checkConnections(implicit F: Effect[F]) =
