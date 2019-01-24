@@ -7,20 +7,20 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.{SaslConfigs, SslConfigs}
 
 trait ConfigurationExtention {
-  val DEFAULT_CONSUMER_PROPS = Map[String, Any](
-    ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -> false,
+  val DEFAULT_CONSUMER_PROPS = Map[String, AnyRef](
+    ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -> Boolean.box(false),
     ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> "earliest"
   )
 
-  val DEFAULT_TRANSACTIONAL_PRODUCER_PROPS = Map[String, Any](
-    ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG -> true,
+  val DEFAULT_TRANSACTIONAL_PRODUCER_PROPS = Map[String, AnyRef](
+    ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG -> Boolean.box(true),
     ProducerConfig.TRANSACTIONAL_ID_CONFIG -> UUID
       .randomUUID()
       .toString // seems to be a good idea to make random per runtime
   )
 
   implicit class ConfigToNativeProps[A](config: KafkaConfiguration) {
-    def asMap: Map[String, Any] = {
+    def asMap: Map[String, AnyRef] = {
       Map[String, AnyRef](
         CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG -> config.bootstrapServers) ++
         config.sasl
