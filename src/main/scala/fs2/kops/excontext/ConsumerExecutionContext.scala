@@ -1,7 +1,5 @@
 package fs2.kops.excontext
 
-import java.util.concurrent.Executors
-
 import cats.effect.Sync
 import cats.syntax.all._
 import fs2.Stream
@@ -24,5 +22,5 @@ final private[kops] class ConsumerExecutionContextBuilder[F[_]] {
 
   def stream(poolSize: Int = 1)(
       implicit F: Sync[F]): Stream[F, ConsumerExecutionContext] =
-    Stream.eval(create(poolSize))
+    new FixedThreadPool[F].stream(poolSize).map(ConsumerExecutionContext(_))
 }

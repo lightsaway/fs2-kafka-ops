@@ -14,5 +14,7 @@ final private[kops] class FixedThreadPool[F[_]] {
         Executors.newFixedThreadPool(poolSize: Int)))
 
   def stream(poolSize: Int)(implicit F: Sync[F]): Stream[F, ExecutionContext] =
-    Stream.eval(create(poolSize))
+    Stream.bracket(F.delay(Executors.newFixedThreadPool(poolSize: Int)))(
+      pool => Stream.emit(ExecutionContext.fromExecutor(pool)),
+      pool => F.delay(pool.shutdown()))
 }
