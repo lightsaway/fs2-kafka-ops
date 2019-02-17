@@ -13,7 +13,8 @@ lazy val `fs2-kafka-ops` = (project in file("."))
         testOptions in Test += Tests.Argument("-oF"),
         javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
         version ~= (_.replace('+', '-')),
-        dynver ~= (_.replace('+', '-'))
+        dynver ~= (_.replace('+', '-')),
+        parallelExecution := false
       )),
     name := "fs2-kafka-ops",
     libraryDependencies ++= Seq(

@@ -15,8 +15,14 @@ trait ConsumerContextBuilder {
 }
 
 final private[kops] class KafkaConsumerExecutionContextBuilder[F[_]] {
-  def create(poolSize: Int = 1)(implicit F: Sync[F]): F[ConsumerExecutionContext] = F.delay(ExecutionContext.fromExecutor(Executors.newFixedThreadPool(poolSize: Int))).map(ConsumerExecutionContext(_))
+  def create(poolSize: Int = 1)(
+      implicit F: Sync[F]): F[ConsumerExecutionContext] =
+    F.delay(
+        ExecutionContext.fromExecutor(
+          Executors.newFixedThreadPool(poolSize: Int)))
+      .map(ConsumerExecutionContext(_))
 
-  def stream(poolSize: Int = 1)(implicit F: Sync[F]): Stream[F, ConsumerExecutionContext] = Stream.eval(create(poolSize))
+  def stream(poolSize: Int = 1)(
+      implicit F: Sync[F]): Stream[F, ConsumerExecutionContext] =
+    Stream.eval(create(poolSize))
 }
-
