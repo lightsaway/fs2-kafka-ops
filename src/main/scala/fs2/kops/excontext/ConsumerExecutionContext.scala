@@ -11,15 +11,15 @@ import scala.concurrent.ExecutionContext
 case class ConsumerExecutionContext(e: ExecutionContext)
 
 trait ConsumerContextBuilder {
-  def consumer[F[_]] = new KafkaConsumerExecutionContextBuilder[F]
+  def consumerExecutionContext[F[_]] = new ConsumerExecutionContextBuilder[F]
+  def fixedThreadPool[F[_]] = new FixedThreadPool[F]
 }
 
-final private[kops] class KafkaConsumerExecutionContextBuilder[F[_]] {
+final private[kops] class ConsumerExecutionContextBuilder[F[_]] {
   def create(poolSize: Int = 1)(
       implicit F: Sync[F]): F[ConsumerExecutionContext] =
-    F.delay(
-        ExecutionContext.fromExecutor(
-          Executors.newFixedThreadPool(poolSize: Int)))
+    new FixedThreadPool[F]
+      .create(poolSize)
       .map(ConsumerExecutionContext(_))
 
   def stream(poolSize: Int = 1)(

@@ -5,12 +5,8 @@ import java.util.concurrent.Executors
 import cats.effect.{IO, Timer}
 import fs2.Pipe
 import fs2.internal.ThreadFactories
-import fs2.kops.{
-  DualExecutionContext,
-  produceOne,
-  produceTransacted,
-  subscribedProducer
-}
+import fs2.kops.excontext.DualExecutionContext
+import fs2.kops.{produceOne, produceTransacted, subscribedProducer}
 import org.apache.kafka.clients.producer.{MockProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
 import org.scalatest.{FlatSpec, Matchers}

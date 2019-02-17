@@ -1,4 +1,4 @@
-package fs2.kops
+package fs2.kops.excontext
 
 import cats.effect.Async
 

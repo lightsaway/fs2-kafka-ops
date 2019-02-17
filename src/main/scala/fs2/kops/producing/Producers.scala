@@ -3,8 +3,8 @@ package fs2.kops.producing
 import cats.effect.Async
 import cats.implicits._
 import fs2.async.mutable.Topic
+import fs2.kops.excontext.DualExecutionContext
 import fs2.{Pipe, Stream}
-import fs2.kops.DualExecutionContext
 import org.apache.kafka.clients.producer.{Producer, ProducerRecord}
 
 trait Producers {
@@ -26,7 +26,7 @@ final private[kops] class ProduceOne[F[_]] extends ProducerActions {
 
 final private[kops] class ProduceTransacted[F[_]] extends ProducerActions {
   import cats.implicits._
-  import fs2.kops.DualExecutionContext._
+  import fs2.kops.excontext.DualExecutionContext._
   def apply[K, V, B](p: Producer[K, V],
                      f: B => ProducerRecord[K, V] = identity _)(
       implicit F: Async[F],
