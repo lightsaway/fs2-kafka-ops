@@ -2,7 +2,7 @@ import Dependencies.{mockito, _}
 
 lazy val `fs2-kafka-ops` = (project in file("."))
   .settings(
-    organizationName := "OVO Energy",
+    organizationName := "lightsaway",
     startYear := Some(2018),
     licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
     scalacOptions ++= ScalacOptions.default ,
