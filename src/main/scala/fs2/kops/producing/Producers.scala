@@ -1,9 +1,8 @@
 package fs2.kops.producing
 
-import cats.effect.Async
+import cats.effect.{Async, ContextShift}
 import cats.implicits._
 import fs2.concurrent.Topic
-import fs2.kops.excontext.DualExecutionContext
 import fs2.{Pipe, Stream}
 import org.apache.kafka.clients.producer.{Producer, ProducerRecord}
 
@@ -26,11 +25,11 @@ final private[kops] class ProduceOne[F[_]] extends ProducerActions {
 
 final private[kops] class ProduceTransacted[F[_]] extends ProducerActions {
   import cats.implicits._
-  import fs2.kops.excontext.DualExecutionContext._
   def apply[K, V, B](p: Producer[K, V],
                      f: B => ProducerRecord[K, V] = identity _)(
       implicit F: Async[F],
-      DC: DualExecutionContext
+      C: ContextShift[F],
+      P: ProducerExecutionContext
   ): List[B] => F[Either[Throwable, List[KafkaSendResult[K, V]]]] =
     events => {
       val transaction: F[Either[Throwable, List[KafkaSendResult[K, V]]]] =
@@ -42,7 +41,7 @@ final private[kops] class ProduceTransacted[F[_]] extends ProducerActions {
           case r @ Right(_) => F.delay(p.commitTransaction()).as(r)
           case l @ Left(_)  => F.delay(p.abortTransaction()).as(l)
         }
-      transaction.blocking
+      C.evalOn(P.e)(transaction)
     }
 }
 
