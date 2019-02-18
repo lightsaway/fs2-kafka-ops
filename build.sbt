@@ -2,9 +2,19 @@ import Dependencies.{mockito, _}
 
 lazy val `fs2-kafka-ops` = (project in file("."))
   .settings(
-    organizationName := "lightsaway",
+    organization := "com.github.lightsaway",
     startYear := Some(2018),
-    licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
+    homepage := Some(url("https://github.com/lightsaway/fs2-kafka-ops")),
+    licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers := List(
+      Developer(
+        "lightsaway",
+        "Anton Serhiienko",
+        "a.a.sergienko@gmail.com",
+        url("https://lightsaway.com")
+      )
+    ),
+
     scalacOptions ++= ScalacOptions.default ,
     inThisBuild(
       List(
@@ -12,8 +22,6 @@ lazy val `fs2-kafka-ops` = (project in file("."))
         scalafmtOnCompile := true,
         testOptions in Test += Tests.Argument("-oF"),
         javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
-        version ~= (_.replace('+', '-')),
-        dynver ~= (_.replace('+', '-')),
         parallelExecution := false
       )),
     name := "fs2-kafka-ops",
@@ -30,5 +38,6 @@ lazy val `fs2-kafka-ops` = (project in file("."))
       mockito.sugar % Test,
       mockito.core % Test
     ),
-    scalafmtOnCompile := true
+    scalafmtOnCompile := true,
+
   )
