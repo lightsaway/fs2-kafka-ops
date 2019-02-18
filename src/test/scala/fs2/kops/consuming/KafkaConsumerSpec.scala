@@ -1,6 +1,6 @@
 package fs2.kops.consuming
 
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import fs2.Pipe
 import fs2.kops.{commitOrSeekBackSink, consumeAndProcessUnchunked, logSink}
 import org.apache.kafka.clients.consumer.{
@@ -62,6 +62,8 @@ class KafkaConsumerSpec extends FlatSpec with Matchers {
       case i => IO(KafkaConsumeSuccess(i, "success"))
     }
   implicit val logger = org.slf4j.LoggerFactory.getLogger("")
+  implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
+
   val process = transformer
     .observe(commitOrSeekBackSink[IO](mockConsumer))
     .observe(logSink[IO]())

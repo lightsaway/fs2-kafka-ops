@@ -39,7 +39,6 @@ final private[kops] class KafkaConsumerBuilder[F[_]] {
       valueDeserializer: Deserializer[V]
   )(implicit F: Sync[F]): Stream[F, Consumer[K, V]] =
     Stream.bracket(create(settings, keyDeserializer, valueDeserializer))(
-      consumer => Stream.emit(consumer).covary[F],
       consumer => F.delay(consumer.close())
     )
 }

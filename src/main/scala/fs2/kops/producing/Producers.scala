@@ -2,7 +2,7 @@ package fs2.kops.producing
 
 import cats.effect.Async
 import cats.implicits._
-import fs2.async.mutable.Topic
+import fs2.concurrent.Topic
 import fs2.kops.excontext.DualExecutionContext
 import fs2.{Pipe, Stream}
 import org.apache.kafka.clients.producer.{Producer, ProducerRecord}

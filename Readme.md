@@ -7,6 +7,7 @@
 #### TODO:
 * ~~Artifact Publishing~~
 * Fix Execution Context
-* Upgrade to latest FS2/Cats
+* ~~Upgrade to latest FS2/Cats~~
+* Upgrade to latest Kafka
 * Docs
 * Examples

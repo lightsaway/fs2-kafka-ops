@@ -1,8 +1,9 @@
 package fs2.kops.processors
 
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import fs2.Stream
-import fs2.async.{Ref, topic}
+import cats.effect.concurrent.Ref
+import fs2.concurrent.Topic
 import fs2.kops.consuming.{KafkaConsumeFailure, KafkaConsumeSuccess}
 import fs2.kops.{
   commitAllSink,
@@ -24,9 +25,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SinksSpec extends FunSuite with Matchers with MockitoSugar {
 
   test("testTopicPublishSink") {
-    val t = topic[IO, Int](0).unsafeRunSync()
+    implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
+    val t = Topic[IO, Int](0).unsafeRunSync()
     val sink = topicPublishSink[IO](t)
-    val stream = fs2.Stream(1, 2, 3, 4, 5).observe(sink)
+    val stream = fs2.Stream(1, 2, 3, 4, 5).covary[IO].observe(sink)
     val values =
       t.subscribe(5).take(6).concurrently(stream).compile.toList.unsafeRunSync()
     values.size shouldBe 6
@@ -35,6 +37,8 @@ class SinksSpec extends FunSuite with Matchers with MockitoSugar {
   }
 
   test("testPrometheusSink") {
+    implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
+
     val counter = Counter
       .build()
       .name("foo")
@@ -42,7 +46,7 @@ class SinksSpec extends FunSuite with Matchers with MockitoSugar {
       .labelNames("name", "type")
       .create()
 
-    val ref = Ref[IO, Counter](counter).unsafeRunSync()
+    val ref = Ref[IO].of(counter).unsafeRunSync()
     val record = new ConsumerRecord("", 0, 0, "", "")
     val stream = fs2
       .Stream(
@@ -70,7 +74,7 @@ class SinksSpec extends FunSuite with Matchers with MockitoSugar {
   }
 
   test("testCommitOrSeekBackSink") {
-
+    implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
     val consumer = mock[Consumer[String, String]]
 
     val commitCaptor = ArgumentCaptor.forClass(
@@ -86,7 +90,8 @@ class SinksSpec extends FunSuite with Matchers with MockitoSugar {
     Stream(
       KafkaConsumeSuccess(record, 1),
       KafkaConsumeFailure(failing, 0)
-    ).observe(commitOrSeekBackSink[IO](consumer))
+    ).covary[IO]
+      .observe(commitOrSeekBackSink[IO](consumer))
       .compile
       .drain
       .unsafeRunSync()
@@ -101,7 +106,7 @@ class SinksSpec extends FunSuite with Matchers with MockitoSugar {
   }
 
   test("testCommitAllSink") {
-
+    implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
     val consumer = mock[Consumer[String, String]]
 
     val commitCaptor = ArgumentCaptor.forClass(
@@ -114,7 +119,8 @@ class SinksSpec extends FunSuite with Matchers with MockitoSugar {
     Stream(
       KafkaConsumeSuccess(record, 1),
       KafkaConsumeFailure(failing, 0)
-    ).observe(commitAllSink[IO](consumer))
+    ).covary[IO]
+      .observe(commitAllSink[IO](consumer))
       .compile
       .drain
       .unsafeRunSync()

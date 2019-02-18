@@ -36,7 +36,6 @@ final private[kops] class KafkaProducerBuilder[F[_]] {
       valueSerializer: Serializer[V]
   )(implicit F: Sync[F]): Stream[F, Producer[K, V]] =
     fs2.Stream.bracket(create[K, V](settings, keySerializer, valueSerializer))(
-      p => Stream.emit(p).covary[F],
       p => Sync[F].delay(p.close())
     )
 

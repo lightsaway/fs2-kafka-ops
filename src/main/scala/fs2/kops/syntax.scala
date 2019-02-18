@@ -1,6 +1,6 @@
 package fs2.kops
 
-import cats.effect.Effect
+import cats.effect.{Concurrent, Effect}
 import fs2.Stream
 import fs2.kops.configuration.ConfigurationExtention
 import fs2.kops.processors.ProcessorExtentions
@@ -10,8 +10,6 @@ import org.apache.kafka.clients.consumer.{
   ConsumerRecords
 }
 import org.apache.kafka.clients.producer.Producer
-
-import scala.concurrent.ExecutionContext
 
 trait ApacheKafkaExtentions {
 
@@ -52,8 +50,8 @@ trait ApacheKafkaExtentions {
 
 trait StreamSyntax {
   implicit class ListOfStreamOps[F[_], A](val lst: List[Stream[F, A]]) {
-    def join(implicit ec: ExecutionContext, F: Effect[F]): Stream[F, A] =
-      Stream(lst: _*).join(lst.size)
+    def join(implicit F: Concurrent[F]): Stream[F, A] =
+      Stream(lst: _*).parJoin(lst.size)
   }
 
 }

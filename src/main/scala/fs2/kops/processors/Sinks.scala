@@ -1,9 +1,9 @@
 package fs2.kops.processors
 
-import cats.effect.{Async, Effect}
-import fs2.Sink
-import fs2.async.Ref
-import fs2.async.mutable.Topic
+import cats.effect.{Async, Concurrent, Effect}
+import fs2.Pipe
+import cats.effect.concurrent.Ref
+import fs2.concurrent.Topic
 import io.prometheus.client.Counter
 import fs2.kops.consuming.{
   ConsumerActions,
@@ -26,18 +26,19 @@ trait Sinks {
 final private[kops] class CommitOrSeekBackSink[F[_]] extends ConsumerActions {
   def apply[K, V](
       consumer: Consumer[K, V]
-  )(implicit F: Async[F]): Sink[F, KafkaProcessResult[K, V]] = _.evalMap {
-    case KafkaConsumeSuccess(record, _) => commit(consumer, record)
-    case KafkaConsumeFailure(record, _) =>
-      seek(consumer,
-           new TopicPartition(record.topic, record.partition),
-           record.offset() - 1)
-  }
+  )(implicit F: Concurrent[F]): Pipe[F, KafkaProcessResult[K, V], Unit] =
+    _.evalMap {
+      case KafkaConsumeSuccess(record, _) => commit(consumer, record)
+      case KafkaConsumeFailure(record, _) =>
+        seek(consumer,
+             new TopicPartition(record.topic, record.partition),
+             record.offset() - 1)
+    }
 }
 
 final private[kops] class LogSink[F[_]] {
   def apply[K, V]()(implicit F: Effect[F],
-                    L: Logger): Sink[F, KafkaProcessResult[K, V]] =
+                    L: Logger): Pipe[F, KafkaProcessResult[K, V], Unit] =
     _.evalMap {
       case KafkaConsumeSuccess(r, _) =>
         F.delay(L.info(s"Consumed ${r}"))
@@ -49,7 +50,7 @@ final private[kops] class LogSink[F[_]] {
 final private[kops] class CommitAllSink[F[_]] extends ConsumerActions {
   def apply[K, V](
       consumer: Consumer[K, V]
-  )(implicit F: Async[F]): Sink[F, KafkaProcessResult[K, V]] =
+  )(implicit F: Async[F]): Pipe[F, KafkaProcessResult[K, V], Unit] =
     _.evalMap(x => commit(consumer, x.rawRecord))
 }
 
@@ -57,7 +58,7 @@ final private[kops] class PrometheusResultSink[F[_]] {
   import cats.syntax.flatMap._
   def apply[K, V](
       counter: Ref[F, Counter]
-  )(implicit F: Effect[F]): Sink[F, KafkaProcessResult[K, V]] =
+  )(implicit F: Effect[F]): Pipe[F, KafkaProcessResult[K, V], Unit] =
     _.evalMap {
       case _ @KafkaConsumeFailure(_, _) =>
         counter.get >>=
@@ -69,6 +70,6 @@ final private[kops] class PrometheusResultSink[F[_]] {
 }
 
 final private[kops] class TopicPublishSink[F[_]] {
-  def apply[E](topic: Topic[F, E]): Sink[F, E] =
+  def apply[E](topic: Topic[F, E]): Pipe[F, E, Unit] =
     _.evalMap { topic.publish1 }
 }

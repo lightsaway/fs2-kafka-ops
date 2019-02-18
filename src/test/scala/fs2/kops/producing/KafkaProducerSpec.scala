@@ -2,7 +2,7 @@ package fs2.kops.producing
 
 import java.util.concurrent.Executors
 
-import cats.effect.{IO, Timer}
+import cats.effect.{ContextShift, IO, Timer}
 import fs2.Pipe
 import fs2.internal.ThreadFactories
 import fs2.kops.excontext.DualExecutionContext
@@ -15,6 +15,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+
 class KafkaProducerSpec extends FlatSpec with Matchers {
 
   behavior.of("subscribed kafka producer stream")
@@ -23,13 +24,14 @@ class KafkaProducerSpec extends FlatSpec with Matchers {
     ThreadFactories.named("blocking", false, false))
   implicit val DC: DualExecutionContext =
     DualExecutionContext(global, ExecutionContext.fromExecutor(blocking))
+  implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
 
   val transformer: Pipe[IO, Int, ProducerRecord[String, String]] = i =>
     i.map(i => new ProducerRecord[String, String]("", "foo", i.toString))
 
   it should "produce transformed messages" in {
 
-    val topic = fs2.async.topic[IO, Int](0).unsafeRunSync()
+    val topic = fs2.concurrent.Topic[IO, Int](0).unsafeRunSync()
 
     val publisherStream = fs2.Stream.eval(topic.publish1(1))
 
@@ -51,15 +53,18 @@ class KafkaProducerSpec extends FlatSpec with Matchers {
 
   it should "throw exception when failing to communicate with kafka" in {
 
-    val topic = fs2.async.topic[IO, Int](0).unsafeRunSync()
+    val topic = fs2.concurrent.Topic[IO, Int](0).unsafeRunSync()
     import cats.syntax.all._
 
     val producer = new MockProducer[String, String](false,
                                                     new StringSerializer,
                                                     new StringSerializer)
+
+    implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+
     val errorEmiter =
       fs2.Stream.eval(
-        Timer[IO].sleep(300.millis) *> IO(
+        timer.sleep(300.millis) *> IO(
           producer.errorNext(new RuntimeException("༼ つ ◕_◕ ༽つ"))))
 
     val eventPublisher = fs2.Stream.eval(topic.publish1(1))

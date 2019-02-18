@@ -1,9 +1,8 @@
 package fs2.kops.processors
 
-import cats.effect.IO
-import fs2.{Pipe, Sink}
+import cats.effect.{ContextShift, IO}
+import fs2.{Pipe}
 import org.scalatest.{FunSuite, Matchers}
-
 import fs2.kops.syntax.pipe._
 class ProcessorExtentionsSpec extends FunSuite with Matchers {
 
@@ -24,9 +23,10 @@ class ProcessorExtentionsSpec extends FunSuite with Matchers {
 
   test("testPipeImprovements 'observe' composition") {
     import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
     var flag: String = ""
     val p1: Pipe[IO, String, String] = identity
-    val p2: Sink[IO, String] = _.evalMap(x => IO { flag = x })
+    val p2: Pipe[IO, String, Unit] = _.evalMap(x => IO { flag = x })
 
     val p3: Pipe[IO, String, String] = p1 observe p2
     fs2
@@ -54,10 +54,11 @@ class ProcessorExtentionsSpec extends FunSuite with Matchers {
   test("testSinkImprovements") {
 
     import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
     var flag1: String = ""
     var flag2: String = ""
-    val s1: Sink[IO, String] = _.evalMap(x => IO { flag1 = x })
-    val s2: Sink[IO, String] = _.evalMap(x => IO { flag2 = x })
+    val s1: Pipe[IO, String, Unit] = _.evalMap(x => IO { flag1 = x })
+    val s2: Pipe[IO, String, Unit] = _.evalMap(x => IO { flag2 = x })
 
     val composed = s1 and s2
 
