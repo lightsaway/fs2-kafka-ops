@@ -6,6 +6,7 @@
 
 #### TODO:
 * ~~Artifact Publishing~~
+* Add more tests with coverage treshold
 * Fix Execution Context
 * ~~Upgrade to latest FS2/Cats~~
 * Upgrade to latest Kafka

@@ -7,10 +7,12 @@ import fs2.Stream
 import scala.concurrent.ExecutionContext
 
 case class ConsumerExecutionContext(e: ExecutionContext)
+case class ProducerExecutionContext(e: ExecutionContext)
 
-trait ConsumerContextBuilder {
+trait ContextBuilder {
   def consumerExecutionContext[F[_]] = new ConsumerExecutionContextBuilder[F]
   def fixedThreadPool[F[_]] = new FixedThreadPool[F]
+  def cachedThreadPool[F[_]] = new CachedhreadPool[F]
 }
 
 final private[kops] class ConsumerExecutionContextBuilder[F[_]] {
