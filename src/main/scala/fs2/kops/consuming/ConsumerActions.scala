@@ -11,18 +11,6 @@ import org.apache.kafka.common.TopicPartition
 import scala.collection.JavaConverters._
 
 trait ConsumerActions {
-  def subscribeAndConsume[F[_], K, V](
-      consumer: Consumer[K, V],
-      topic: String,
-      timeout: Long
-  )(implicit F: Async[F]): Stream[F, ConsumerRecords[K, V]] = {
-    for {
-      _ <- Stream.eval(subscribe[F](consumer, topic))
-      batch <- consume[F, K, V](consumer, timeout)
-        .filter(_.count() > 0)
-        .repeat
-    } yield batch
-  }
 
   def consume[F[_], K, V](
       consumer: Consumer[K, V],
