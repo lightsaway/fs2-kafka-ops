@@ -17,7 +17,11 @@ trait ApacheKafkaExtentions {
 
   implicit class ConsumerRecordsSugar[K, V](r: ConsumerRecords[K, V]) {
     def partitioned: List[List[ConsumerRecord[K, V]]] =
-      r.partitions().asScala.map(tp => r.records(tp).asScala.toList).toList
+      r.partitions()
+        .asScala
+        .toList
+        .sortBy(x => (x.topic(), x.partition()))
+        .map(tp => r.records(tp).asScala.toList)
 
     def all: List[ConsumerRecord[K, V]] =
       r.partitioned.flatten
